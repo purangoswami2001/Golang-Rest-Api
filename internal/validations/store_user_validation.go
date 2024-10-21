@@ -54,3 +54,26 @@ func ValidateUser(user models.User, isUpdate bool) ValidationErrors {
 
 	return validationErrors
 }
+
+func ValidateUserLogin(user models.UserLogin) ValidationErrors {
+	var validationErrors ValidationErrors
+
+	if user.Email == "" {
+		validationErrors.Errors = append(validationErrors.Errors, ValidationError{
+			Field:   "email",
+			Message: "Email is required",
+		})
+	} else if !ValidateEmail(user.Email) {
+		validationErrors.Errors = append(validationErrors.Errors, ValidationError{
+			Field:   "email",
+			Message: "Invalid email format",
+		})
+	}
+	if user.Password == "" {
+		validationErrors.Errors = append(validationErrors.Errors, ValidationError{
+			Field:   "password",
+			Message: "Password is required",
+		})
+	}
+	return validationErrors
+}

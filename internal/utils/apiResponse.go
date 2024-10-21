@@ -21,3 +21,11 @@ func ErrorResponse(message string) APIResponse {
 		Data:    nil,
 	}
 }
+
+func ValidationErrorResponse(message string, data interface{}) APIResponse {
+	return APIResponse{
+		Status:  false,
+		Message: message,
+		Data:    data,
+	}
+}

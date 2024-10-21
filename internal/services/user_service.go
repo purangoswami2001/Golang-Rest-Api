@@ -3,6 +3,9 @@ package services
 import (
 	"api/internal/models"
 	"api/internal/repositories"
+	"errors"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserService interface {
@@ -11,6 +14,7 @@ type UserService interface {
 	GetAll() ([]models.User, error)
 	Update(user *models.User) error
 	Delete(id int) error
+	Login(login *models.UserLogin) (*models.User, error)
 }
 
 type userService struct {
@@ -39,4 +43,19 @@ func (s *userService) Delete(id int) error {
 
 func (s *userService) GetAll() ([]models.User, error) {
 	return s.repo.GetAll()
+}
+
+// Update the Login method to accept UserLogin instead of User
+func (s *userService) Login(login *models.UserLogin) (*models.User, error) {
+	var userModel models.User
+	if err := s.repo.FindByEmail(login.Email, &userModel); err != nil {
+		return nil, errors.New("user not found")
+	}
+
+	// Compare the hashed password with the provided password
+	if err := bcrypt.CompareHashAndPassword([]byte(userModel.Password), []byte(login.Password)); err != nil {
+		return nil, errors.New("invalid password")
+	}
+
+	return &userModel, nil
 }

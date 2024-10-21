@@ -35,5 +35,10 @@ type UsetrUpdateRequest struct {
 	FirstName string `json:"name" binding:"required"`
 	LastName  string `json:"last_name"`
 	Email     string `json:"email"`
-	Password  string `json:"type"`
+	Password  string `json:"password"`
+}
+
+type UserLogin struct {
+	Email    string `json:"email" binding:"required"`
+	Password string `json:"password" binding:"required"`
 }

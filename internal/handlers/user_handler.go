@@ -148,3 +148,44 @@ func HashPassword(password string) (string, error) {
 	}
 	return string(hashedPassword), nil
 }
+
+func (h *UserHandler) Login(c *gin.Context) {
+	var loginReq models.UserLogin
+
+	if err := c.ShouldBindJSON(&loginReq); err != nil {
+		c.JSON(http.StatusBadRequest, utils.ErrorResponse("Invalid request body"))
+		return
+	}
+
+	// Validate user fields
+	validationErrors := validations.ValidateUserLogin(loginReq)
+	if len(validationErrors.Errors) > 0 {
+		c.JSON(http.StatusBadRequest, utils.ValidationErrorResponse(validationErrors.Errors[0].Message, validationErrors))
+		return
+	}
+
+	// Call the service to handle login logic
+	user, err := h.service.Login(&loginReq)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, utils.ErrorResponse(err.Error()))
+		return
+	}
+
+	// Generate JWT token
+	token, err := utils.GenerateJWT(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, utils.ErrorResponse("Could not generate token"))
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "User logged in successfully",
+		"user": gin.H{
+			"id":         user.ID,
+			"first_name": user.FirstName,
+			"last_name":  user.LastName,
+			"email":      user.Email,
+		},
+		"token": token,
+	})
+}

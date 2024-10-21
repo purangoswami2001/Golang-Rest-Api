@@ -12,6 +12,7 @@ type UserRepository interface {
 	GetAll() ([]models.User, error)
 	Update(user *models.User) error
 	Delete(id int) error
+	FindByEmail(email string, user *models.User) error
 }
 
 type userRepository struct {
@@ -44,4 +45,9 @@ func (r *userRepository) GetAll() ([]models.User, error) {
 	var users []models.User
 	err := r.db.Find(&users).Error
 	return users, err
+}
+
+// FindByEmail fetches a user by their email
+func (r *userRepository) FindByEmail(email string, user *models.User) error {
+	return r.db.Where("email = ?", email).First(user).Error
 }
